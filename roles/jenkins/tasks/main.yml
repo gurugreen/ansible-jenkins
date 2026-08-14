@@ -40,13 +40,10 @@
     uris:
       - https://pkg.jenkins.io/debian-stable
     suites:
-      - binary
-    components:
-      - /
+      - binary/
     signed_by: "{{ jenkins_keyring_file }}"
     state: present
     enabled: true
-    install_python_debian: true
 
 - name: Install Jenkins LTS
   ansible.builtin.apt:
