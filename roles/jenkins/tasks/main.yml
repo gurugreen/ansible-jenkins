@@ -11,7 +11,8 @@
   ansible.builtin.apt:
     name:
       - fontconfig
-      - "{{ jenkins_java_package }}"
+      - openjdk-21-jre
+      - python3-debian
     state: present
     update_cache: true
 
