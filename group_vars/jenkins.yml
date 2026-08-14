@@ -1,0 +1,44 @@
+---
+jenkins_url: "http://localhost:8085"
+jenkins_user: "admin"
+jenkins_api_token: "11082b3c5a547fdc6fcd7bdf0e21d6ba27"
+
+jenkins_plugins:
+  - name: dashboard-view
+    version: "2.558.v96b_901978e47"
+
+  - name: credentials-binding
+    version: "728.v902a_273b_8947"
+
+  - name: timestamper
+    version: "1.30"
+
+  - name: nodejs
+    version: "1.6.6"
+
+  - name: junit
+    version: "1418.v67a_81935603c"
+
+  - name: workflow-aggregator
+    version: "608.v67378e9d3db_1"
+
+  - name: github-branch-source
+    version: "1983.vfa_27ed961853"
+
+  - name: pipeline-github-lib
+    version: "65.v203688e7727e"
+
+  - name: pipeline-graph-view
+    version: "998.vc30deece0e36"
+
+  - name: parameterized-trigger
+    version: "893.va_383a_9b_a_4c11"
+
+  - name: copyartifact
+    version: "795.ve8e151429b_27"
+
+  - name: git
+    version: "5.10.1"
+
+  - name: dark-theme
+    version: "652.vea_da_dfea_e769"

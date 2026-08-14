@@ -1,0 +1,55 @@
+---
+- name: Validate Jenkins plugin list
+  ansible.builtin.assert:
+    that:
+      - jenkins_plugins | length == 13
+    fail_msg: "Expected exactly 13 Jenkins plugins."
+    success_msg: "Jenkins plugin list contains exactly 13 plugins."
+- name: Install required Jenkins plugins
+  community.general.jenkins_plugin:
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+    state: present
+    jenkins_home: /var/lib/jenkins
+    url: "{{ jenkins_url }}"
+    url_username: "{{ jenkins_user }}"
+    url_password: "{{ jenkins_api_token }}"
+    force_basic_auth: true
+  loop: "{{ jenkins_plugins }}"
+  loop_control:
+    label: "{{ item.name }}:{{ item.version }}"
+  notify: Restart Jenkins
+
+- name: Flush Jenkins handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Query Jenkins installed plugins
+  ansible.builtin.uri:
+    url: "{{ jenkins_url }}/pluginManager/api/json?depth=1"
+    method: GET
+    user: "{{ jenkins_user }}"
+    password: "{{ jenkins_api_token }}"
+    force_basic_auth: true
+    return_content: true
+    status_code: 200
+  register: jenkins_plugin_info
+  no_log: true
+
+- name: Verify Jenkins plugin versions
+  ansible.builtin.assert:
+    that:
+      - >
+        (
+          jenkins_plugin_info.json.plugins
+          | selectattr('shortName', 'equalto', item.name)
+          | map(attribute='version')
+          | first
+          | default('')
+        ) == item.version
+    fail_msg: >-
+      Plugin {{ item.name }} is not installed at version {{ item.version }}.
+    success_msg: >-
+      Plugin {{ item.name }} is installed at version {{ item.version }}.
+  loop: "{{ jenkins_plugins }}"
+  loop_control:
+    label: "{{ item.name }}:{{ item.version }}"

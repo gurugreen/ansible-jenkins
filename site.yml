@@ -1,0 +1,7 @@
+---
+- name: Manage Jenkins
+  hosts: jenkins
+  become: true
+
+  roles:
+    - role: jenkins_plugins
