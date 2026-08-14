@@ -46,3 +46,4 @@
     signed_by: "{{ jenkins_keyring_file }}"
     state: present
     enabled: true
+    install_python_debian: true
