@@ -1,0 +1,74 @@
+---
+- name: Validate operating system
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == 'Ubuntu'
+      - ansible_facts['distribution_version'] is version('24.04', '==')
+    fail_msg: "This role requires Ubuntu 24.04."
+    success_msg: "Ubuntu 24.04 detected."
+
+- name: Install Jenkins prerequisites
+  ansible.builtin.apt:
+    name:
+      - fontconfig
+      - "{{ jenkins_java_package }}"
+    state: present
+    update_cache: true
+
+- name: Create APT keyring directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install Jenkins repository signing key
+  ansible.builtin.get_url:
+    url: "{{ jenkins_repository_key_url }}"
+    dest: "{{ jenkins_keyring_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure Jenkins LTS repository
+  ansible.builtin.apt_repository:
+    repo: "{{ jenkins_repository }}"
+    filename: jenkins
+    state: present
+    update_cache: true
+
+- name: Install Jenkins LTS
+  ansible.builtin.apt:
+    name: jenkins
+    state: "{{ jenkins_package_state }}"
+  notify: Restart Jenkins
+
+- name: Configure Jenkins port
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/jenkins.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Service]
+      Environment="JENKINS_PORT={{ jenkins_port }}"
+  notify:
+    - Reload systemd
+    - Restart Jenkins
+
+- name: Enable and start Jenkins
+  ansible.builtin.systemd_service:
+    name: jenkins
+    enabled: true
+    state: started
+
+- name: Wait for Jenkins
+  ansible.builtin.uri:
+    url: "{{ jenkins_url }}"
+    status_code: 200
+    timeout: 5
+  register: jenkins_health
+  retries: 60
+  delay: 5
+  until: jenkins_health.status == 200

@@ -1,7 +1,8 @@
 ---
-- name: Manage Jenkins
+- name: Install and configure Jenkins
   hosts: jenkins
   become: true
 
   roles:
+    - role: jenkins
     - role: jenkins_plugins
