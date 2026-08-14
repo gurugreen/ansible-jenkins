@@ -32,11 +32,19 @@
     mode: "0644"
 
 - name: Configure Jenkins LTS repository
-  ansible.builtin.apt_repository:
-    repo: "{{ jenkins_repository }}"
-    filename: jenkins
+  ansible.builtin.deb822_repository:
+    name: jenkins
+    types:
+      - deb
+    uris:
+      - https://pkg.jenkins.io/debian-stable
+    suites:
+      - binary
+    components:
+      - /
+    signed_by: "{{ jenkins_keyring_file }}"
     state: present
-    update_cache: true
+    enabled: true
 
 - name: Install Jenkins LTS
   ansible.builtin.apt:
